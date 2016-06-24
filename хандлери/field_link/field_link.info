@@ -1,0 +1,11 @@
+name        = "Field link"
+description = "Link on article author."
+core        = "7.x"
+version     = "7.x-0.1"
+package     = "Custom module"
+project     = "field_link"
+
+; Dependencies
+dependencies[] = views
+
+files[] = "includes/field_link_handler.inc"

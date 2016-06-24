@@ -1,0 +1,3 @@
+name = Blocks
+description = "Модуль для создания тестового блока"
+core = 7.x

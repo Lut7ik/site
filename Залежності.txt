@@ -1,0 +1,9 @@
+видалити color(bartik) Overlay 
+
+розширене адмін меню - admin menu(видалити toolbar)
+
+залежності полей - Conditional Fields
+
+приховати поле для різних ролей(умова)- field permissions
+
+защита від спаму - Captcha, Mollom і Antispam

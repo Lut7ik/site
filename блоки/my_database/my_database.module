@@ -1,0 +1,161 @@
+<?php
+function my_database_block_info() {
+  // This example comes from node.module.
+  $blocks = array();
+  $blocks['b'] = array(
+    'info' => t('my_database_block'),
+  );
+
+  $blocks['t'] = array(
+    'info' => t('my_database_block_form'),
+  );
+
+  return $blocks;
+}
+
+function my_database_block_view($delta = '') {
+  // This example is adapted from node.module.
+  $block = array();
+
+  switch ($delta) {
+    case 'b':
+      $block['subject'] = t('my_database_block');
+      $block['content'] =''; 
+	  $header = array(t('ID'), t('nam'),t('Actions'));
+              $rows = array();
+              $query = db_select('my_table', 't')
+              ->fields('t', array('id', 'nam'))
+              ->execute();
+             while ($value = $query->fetchAssoc()) {
+                        $rows[] = array(
+                        $value['id'],
+                        $value['nam'],
+                        l(t('Delete'), "my_database/{$value['id']}/delete"),
+    	                );
+             }
+			 $block['content'] .=theme('table', array('header' => $header, 'rows' => $rows));
+      break;
+
+    case 't':
+         $block['subject'] = t('my_database_block_form');
+         $block['content'] = drupal_get_form('my_database_insert_form');
+
+      break;
+  }
+  return $block;
+}
+/**
+ * @file
+ * Contains base function for module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function my_database_menu() {
+  $items['my_database/insert'] = array(
+    'title' => 'Page for insert data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('my_database_insert_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['my_database/%/delete'] = array(
+    'title callback' => 'my_database_delete_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('my_database_delete_form', 1),
+    'access arguments' => array('administer site configuration'),
+  );
+  return $items;
+}
+
+/**
+ * Build form for insert data.
+ */
+function my_database_insert_form($form, $form_state) {
+  $form = array();
+  $form['nam'] = array(
+    '#title' => t('nam'),
+    '#type' => 'textfield',
+    '#maxlength' => 10,
+    '#description' => t('Only numbers'),
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+/**
+ * Validate for my_database_insert_form.
+ */
+function my_database_insert_form_validate($form, &$form_state) {
+  if (drupal_strlen($form_state['values']['nam']) > 10) {
+    form_set_error('number', t('Field "@fieldname" must be less than @c chars.',
+      array('@fieldname' => t('Number'), '@c' => 10)));
+  }
+  elseif (!ctype_digit($form_state['values']['nam'])) {
+    form_set_error('number', t('Field "number" must contains an integer.'));
+  }
+}
+
+/**
+ * Submit for my_database_insert_form.
+ */
+function my_database_insert_form_submit($form, &$form_state) {
+  $query = db_insert('my_table')
+    ->fields(array(
+      'nam' => $form_state['values']['nam'],
+    ))
+    ->execute();
+  if ($query > 0) {
+    drupal_set_message(t('Data has been successfully sent.'));
+  }
+  else {
+    drupal_set_message(t("Data hasn't been sent."), 'error');
+  }
+}
+
+/**
+ * Callback title for delete page.
+ */
+function my_database_delete_page_title($id) {
+  $placeholders = array(':id' => $id);
+  $number = db_query("SELECT `id` FROM {my_table} WHERE `id` = :id", $placeholders)->fetchField();
+  return t('Are you sure you want to delete item with number "@id"?', array('@id' => $number));
+}
+
+/**
+ * Build delete form page.
+ */
+function my_database_delete_form($form, $form_state) {
+  $form = array();
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  $form['cancel'] = array(
+    '#markup' => l(t('Cancel'), 'my_database'),
+  );
+  return $form;
+}
+
+/**
+ * Submit function for delete form.
+ */
+function my_database_delete_form_submit($form, &$form_state) {
+  $id = $form_state['build_info']['args'][0];
+  $result = db_delete('my_table')
+    ->condition('id', $id)
+    ->execute();
+  $placeholders = array('@id' => $id);
+  if ($result) {
+    drupal_set_message(t('Record @id successfully removed.', $placeholders));
+  }
+  else {
+    drupal_set_message(t('Record @id is undefined.', $placeholders), 'warning');
+  }
+  $form_state['redirect'] = 'my_database/';
+}

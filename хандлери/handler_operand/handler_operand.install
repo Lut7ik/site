@@ -1,0 +1,49 @@
+<?php
+/**
+ * Реализует hook_schema
+ *
+ * @return schema array
+ */
+function handler_operand_schema() {
+	//source table
+	$schema['testnode'] = array(
+		'description' => t('My test node additional table'),
+		'fields' => array(
+			'tid' => array(
+				'description' => t('This table ID'),
+				'type' 		  => 'serial',
+				'unsigned'	  => TRUE,
+				'not null'	  => TRUE,
+			),
+			'nid' => array(
+				'description' => t('Corresponding node ID'),
+				'type'		  => 'int',
+				'unsigned'	  => TRUE,
+				'not null'	  => TRUE,
+			),
+			'int_count' => array(
+				'description' => t('Count'),
+				'type'		  => 'int',
+				'unsigned'	  => TRUE,
+				'not null'	  => TRUE,
+			),
+			'int_total' => array(
+				'description' => t('Total'),
+				'type'		  => 'int',
+				'unsigned'	  => TRUE,
+				'not null'	  => TRUE,
+			),
+		),
+		'primary key' => array('tid'),
+	);
+	
+	return $schema;
+} //function mytest_schema
+
+/**
+ * Реализует hook_uninstall
+ *
+ */
+function handler_operand_uninstall() {
+	drupal_uninstall_schema('handler_operand');
+}

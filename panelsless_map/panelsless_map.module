@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Code for the panelsless_map module.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function panelsless_map_ctools_plugin_directory($module, $plugin) {
+  if (($module == 'panels' && in_array($plugin, array('layouts', 'styles'))) || ($module == 'ctools' && in_array($plugin, array('relationships', 'contexts', 'access', 'content_types')))) {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function panelsless_map_theme() {
+  $theme = array();
+  
+  $base = array(
+    'path' => drupal_get_path('module', 'panelsless_map') . '/theme',
+  );
+
+  $theme['panelsless_map'] = array(
+    'variables' => array(
+      'logo' => NULL,
+    ),
+    'template' => 'panelsless-map',
+  ) + $base;  
+  
+  return $theme;
+}

@@ -1,0 +1,31 @@
+<?php
+/**
+ * Implements hook_block_info().
+ */
+function blocks_block_info() {
+  $blocks = array();
+  $blocks['my_first_block'] = array(
+    'info' => t('My customs block'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function blocks_block_view($delta = '') {
+  $block = array();
+
+  if ($delta =='my_first_block') {
+       $block['subject'] = t('Block subject');
+       $block['content'] = t('Block content');
+  }
+
+  return $block;
+}
+/**
+*'info' =>назва блоку в списках блоків
+*'subject' =назва блоку на сторінці
+*'content' =зміст блоку
+*/

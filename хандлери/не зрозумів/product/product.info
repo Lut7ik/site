@@ -1,0 +1,13 @@
+name = Product
+description = Defines the product entity and associated features.
+core = 7.x
+dependencies[] = entity
+
+dependencies[] = views
+
+
+files[] = views/handlers/product_handler_field_product.inc
+files[] = views/handlers/product_handler_field_product_status.inc
+files[] = views/handlers/product_handler_field_product_operations.inc
+files[] = views/handlers/product_handler_filter_product_status.inc
+files[] = views/handlers/product_handler_argument_product_id.inc

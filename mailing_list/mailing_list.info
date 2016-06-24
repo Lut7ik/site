@@ -1,0 +1,9 @@
+name        = "mailing_list"
+description = "Custom module to send messages for users."
+core        = "7.x"
+version     = "7.x-0.1"
+package     = "Custom module"
+project     = "mailing_list"
+
+; Dependencies
+dependencies[] = entity

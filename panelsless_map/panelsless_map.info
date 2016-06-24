@@ -1,0 +1,6 @@
+core = "7.x"
+name = "Panelsless map"
+description = "Custom panelsless ctools map module"
+package = "Panelsless"
+project = "panelsless_map"
+version = "7.x-0.1"

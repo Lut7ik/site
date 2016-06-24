@@ -1,0 +1,12 @@
+name        = "handler operand"
+description = "Link on handler operand."
+core        = "7.x"
+version     = "7.x-0.1"
+package     = "Custom module"
+project     = "handler_operand"
+
+; Dependencies
+dependencies[] = views
+
+files[] = "includes/handler_operand_field.inc"
+files[] = "includes/handler_operand_filter.inc"

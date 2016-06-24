@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ *
+ */
+
+/**
+ * Imeplemetns hook_views_api().
+ */
+function handler_operand_views_api() {
+	return array('api' => 3);
+}

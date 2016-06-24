@@ -1,0 +1,203 @@
+<?php
+/**
+ * @file
+ * Code for the mailing_list module.
+ */
+
+/**
+ * Implements hook_entity_info().
+ */
+function mailing_list_entity_info() {
+	$info = array();
+	// "mailing_list" - машинне ім'я нашої сутності.
+	$info['mailing_list'] = array(
+		// label - задає ім'я сутності, що зручне для сприяння людиною (human-readable).
+		'label' => t('Mailing list'),
+		// Базова таблиця в БД для нашої сутності.
+		'base table' => 'mailing_list',
+		// Властивості сутності що її ідентифікують.
+		'entity keys' => array(
+			// Вказуємо PRIMARY KEY нашої таблиці.
+			'id' 		=> 'id',
+		),
+		// Машинне ім'я модуля, в якому реалізована сутність.
+		'module' => 'mailing_list',
+		'entity class' => 'Entity',
+		'controller class' => 'EntityAPIController',
+	);
+
+	return $info;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function mailing_list_menu() {
+	$items = array();
+	// "custom-entity" - внутрішній адрес сторінки в Drupal.
+	$items['custom-entity'] = array(
+		// Заголовок сторінки.
+		'title'						=> t('Custom entity'),
+		// Функція яка формує контент сторінки.
+		'page callback' 	=> 'drupal_get_form',
+		'page arguments' => array('custom_entity_page'),
+		// Сторінка буде доступна для всіх.
+		'access callback'	=> TRUE,
+		// Тип меню.
+		'menu_name'				=> 'main-menu',
+	);
+	
+	$items['custom-entity/1'] = array(
+		// Заголовок сторінки.
+		'title'						=> t('Custom entity/1'),
+		// Функція яка формує контент сторінки.
+		'page callback' 	=> 'mailing_list_show_table',
+		
+		// Сторінка буде доступна для всіх.
+		'access callback'	=> TRUE,
+		// Тип меню.
+		'menu_name'				=> 'main-menu',
+	);
+	
+	$items['mailing_list/%/delete'] = array(
+  'title callback' => 'mailing_list_delete_page_title',
+  'title arguments' => array(1),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('mailing_list_delete_form', 1),
+  'access arguments' => array('administer site configuration'),
+);
+
+	return $items;
+}
+
+/**
+ * Add or edit our entity.
+ */
+function custom_entity_page($form, $form_state) {
+	$form = array();
+	// Дістаємо користувача у якого email = admin@gmail.com.
+	$entities = entity_load('mailing_list', FALSE, array('email' => 'admin@gmail.com'));
+	if (!empty($entities)) {
+		$entities = reset($entities);
+	}
+	// Формуємо поля форми із значеннями по замовчуванню.
+	$form['name'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Name'),
+		'#required' => TRUE,
+		'#default_value' => isset($entities->name)? $entities->name: '',
+	);
+	$form['email'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Email'),
+		'#required' => TRUE,
+		'#default_value' => isset($entities->email)? $entities->email: '',
+	);
+	if (isset($entities->time)) {
+		$form['updated'] = array(
+			'#type' => 'markup',
+			'#markup' => date('d.m.Y / H:i:s', $entities->time),
+			'#prefix' => '<strong>' . t('Updated: ') . '</strong>',
+			'#suffix' => '<br />',
+		);
+	}
+	$form['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Submit'),
+	);
+	return $form;
+}
+
+/**
+ * Submit handler for custom_entity_page().
+ */
+function custom_entity_page_submit($form, &$form_state) {
+	$email = trim($form_state['values']['email']);
+	$name = trim($form_state['values']['name']);
+	// Перевіряємо, чи існує користувач у списку розсилки.
+	$entity = entity_load('mailing_list', FALSE, array('email' => $email));
+	if (empty($entity)) {
+		// Створюємо користувача, якщо він відсутній.
+		$entity = entity_create('mailing_list', array());
+	  $entity->name = $name;
+	  $entity->email = $email;
+	  $entity->time = time();
+	  $entity->save();
+	  drupal_set_message(t('Сутність створeно.'), 'status');
+	}
+	else {
+		// Оновлюємо інформацію про користувача,
+		// якщо користувач вже є в системі.
+		$entity = reset($entity);
+		$entity->name = $name;
+	  $entity->email = $email;
+	  $entity->time = time();
+	  $entity->save();
+		drupal_set_message(t('Сутність оновлено.'), 'status');
+	}
+}
+/**
+ * Menu callback для url "custom-entity"
+ */
+function mailing_list_show_table()
+{
+$header = array(
+    'name' => array('data' => t('name'), 'field' => 'm.name'),
+     'email' => array('data' => t('email'), 'field' => 'm.email'),
+   	'operations' => array('data' => t('Operations')),
+  );	
+$mailing_lists = db_select('mailing_list', 'm')->extend('PagerDefault')->extend('TableSort')
+->fields('m', array('id','name','email'))->limit(3)
+->orderBy('m.id')->execute();
+$destination = drupal_get_destination();
+$rows = array();
+ 
+while ($value = $mailing_lists->fetchAssoc()) {
+  $rows[] = array(
+  $value['name'], 
+  $value['email'],
+  l(t('Delete'), "mailing_list/{$value['id']}/delete")
+  );
+}
+ $output = theme('table', array('header' => $header, 'rows' => $rows));
+ $page = array();
+  $page['mailing_list'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No mailing_list available.'),
+  );
+ 
+  $page['pager'] = array('#markup' => theme('pager'));
+  return $page;
+}
+function mailing_list_delete_page_title($id) {
+  $placeholders = array(':id' => $id);
+  $number = db_query("SELECT `id` FROM {mailing_list} WHERE `id` = :id", $placeholders)->fetchField();
+  return t('Are you sure you want to delete item with number "@id"?', array('@id' => $number));
+}
+function mailing_list_delete_form($form, $form_state) {
+  $form = array();
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  $form['cancel'] = array(
+    '#markup' => l(t('Cancel'), 'mailing_list'),
+  );
+  return $form;
+}
+function mailing_list_delete_form_submit($form, &$form_state) {
+  $id = $form_state['build_info']['args'][0];
+  $result = db_delete('mailing_list')
+    ->condition('id', $id)
+    ->execute();
+  $placeholders = array('@id' => $id);
+  if ($result) {
+    drupal_set_message(t('Record @id successfully removed.', $placeholders));
+  }
+  else {
+    drupal_set_message(t('Record @id is undefined.', $placeholders), 'warning');
+  }
+  $form_state['redirect'] = 'custom-entity/1';
+}

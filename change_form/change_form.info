@@ -1,0 +1,6 @@
+name        = "change_form"
+description = "Custom module for change Drupal form."
+core        = "7.x"
+version     = "7.x-0.1"
+package     = "Custom module"
+project     = "change_form"

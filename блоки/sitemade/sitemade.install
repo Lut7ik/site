@@ -1,0 +1,38 @@
+<?php
+/**
+ * @file
+ * Installation file for My database module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function sitemade_schema() {
+  $schema['usersis'] = array(
+    'description' => 'Custom table from My database module.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The primary identifier for a record.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nume' => array(
+        'description' => 'Field for integer number.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+         ),
+    'primary key' => array('uid'),
+  );
+  return $schema;
+}
+/**
+ * Implements hook_uninstall().
+ */
+function sitemade_uninstall() {
+	// Видаляємо нашу таблицю із БД.
+	drupal_uninstall_schema('sitemade');
+}

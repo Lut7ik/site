@@ -1,0 +1,7 @@
+drush en admin_menu module_filter en l10n_update i18n i18nviews hreflang transliteration panels panels everywhere entity api eck devel 
+elysia cron features strongarm uuid_features uuid backup and migrate boost token pathauto–y
+
+drush dl zen zurb foundation 
+
+drush dis overlay toolbar –y
+

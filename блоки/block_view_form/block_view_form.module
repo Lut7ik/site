@@ -1,0 +1,71 @@
+<?php
+ /**
+ * Implements hook_block_info().
+ */
+function block_view_form_block_info(){
+    $blocks = array();
+    $blocks[1]['info'] = 'Список пользователей';
+    return $blocks;
+}
+  function block_view_form_block_view($delta = ''){
+      $block = array(); //инициализируем пустой массив блока
+      switch ($delta){
+          case 1: //такая же delta как мы возвращали в hook_block_info()
+              $block['subject'] = 'Пользователи'; //выводим заголовок блока
+              $block['content'] = ''; //инициализируем строковую переменную
+              $header = array(t('sid'), t('nam'),t('Actions'));
+              $rows = array();
+			  $query = $query = db_select('webform_views_tab', 't') //запрос выборки пользователей
+                 ->fields('t', array('sid', 'nam'))
+                 ->execute();
+                while ($value = $query->fetchAssoc()) {
+    $rows[] = array(
+      $value['sid'],
+      $value['nam'],
+      l(t('Delete'), "block_view_form/{$value['sid']}/delete"),
+    );
+				}
+                  $block['content'] .=theme('table', array('header' => $header, 'rows' => $rows));;
+                  // base_path() - функция возвращает путь к корню сайта
+           break;
+      }
+      return $block;
+  }
+
+function block_view_form_menu() {
+    $items['block_view_form/%/delete'] = array(
+        'title' => 'Delete node',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('block_view_form_delete_confirm', 2),
+        'access arguments' => array('administer nodes'),
+        'type' => MENU_CALLBACK,
+		);
+ 
+    return $items;
+}
+function block_view_form_node_load($sid) {
+    $node = db_query("SELECT sid, title FROM {webform_views_tab} WHERE sid = %d", $sid);
+    return db_fetch_object($node);
+}
+function block_view_form_delete_confirm(&$form_state, $node) {
+    $form['sid'] = array(
+        '#type' => 'value',
+        '#value' => $node->sid,
+    );
+ 
+    return confirm_form($form,
+        'Вы действительно хотите удалить ноду <i>' . check_plain($node->title) . '</i>?',
+        'content/tab',
+        'Эта операция не обратима',
+        'Удалить',
+        'Отменить'
+    );
+}
+function block_view_delete_confirm_submit($form, &$form_state) {
+    if ($form_state['values']['confirm']) {
+        db_query('DELETE FROM {webform_views_tab} WHERE sid = %d', $form_state['values']['sid']);            
+        drupal_set_message('Нода удалена');
+    }
+ 
+    drupal_goto('content/tab');
+}

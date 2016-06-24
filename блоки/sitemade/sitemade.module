@@ -1,0 +1,29 @@
+<?php
+ /**
+ * Implements hook_block_info().
+ */
+function sitemade_block_info(){
+    $blocks = array();
+    $blocks[1]['info'] = 'Список пользователей';
+    return $blocks;
+}
+  function sitemade_block_view($delta = ''){
+      $block = array(); //инициализируем пустой массив блока
+      switch ($delta){
+          case 1: //такая же delta как мы возвращали в hook_block_info()
+              $block['subject'] = 'Пользователи'; //выводим заголовок блока
+              $block['content'] = ''; //инициализируем строковую переменную
+              $query = db_select('usersis', 'u') //запрос выборки пользователей
+                ->fields('u', array('uid', 'name')) //выбор полей
+                ->orderBy('u.uid', 'DESC') //сортируем по убыванию
+                ->range(0, 5) //выбор пяти пользователей
+                ->execute(); //запрос к БД
+              $users = $query->fetchAll(PDO::FETCH_ASSOC); //обрабатывает запрос в виде массива
+              foreach($users as $user){
+                  $block['content'] .='<div><a href="' . base_path() . 'user/' . $user['uid'] . '">' . $user['name'] . '</a></div>';
+                  // base_path() - функция возвращает путь к корню сайта
+              }
+          break;
+      }
+      return $block;
+  }

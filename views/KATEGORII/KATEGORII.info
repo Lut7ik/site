@@ -1,0 +1,10 @@
+name        = "KATEGORII"
+description = "views page KATEGORII."
+core        = "7.x"
+version     = "7.x-0.1"
+package     = "Custom module"
+project     = "field_link"
+
+; Dependencies
+dependencies[] = views
+

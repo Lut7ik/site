@@ -1,0 +1,4 @@
+name = My database
+description = Module for example of use Database API in Drupal.
+core = 7.x
+version = 7.x-1.x-dev

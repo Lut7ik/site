@@ -1,0 +1,74 @@
+<?php
+/**
+ * @file
+ * Contains install and update functions for mailing list module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function mailing_list_schema() {
+	$schema = array();
+	// "mailing_list" - ім'я нашої таблиці.
+	$schema['mailing_list'] = array(
+		'description' => 'Свій коментар до таблиці.',
+		// Описуємо поля таблиці.
+		'fields' => array(
+			// Стовпчик "id".
+			'id' => array(
+				// Тип поля. serial = AUTO_INCREMENT.
+				'type'        => 'serial',
+        // Поле не може бути від'ємним.
+        'unsigned'    => TRUE,
+        // А також не може бути порожнім.
+        'not null'    => TRUE,
+        // Коментар до стовпчика.
+        'description' => 'ID mailing list.',
+			),
+			// Стовпчик "name".
+			'name' => array(
+				'type' 				=> 'varchar',
+				// Максимальна довжина поля.
+				'length'      => 64,
+        'description' => 'User name.',
+        // Значення за замовчуванням.
+        'default'     => 'Anonymous',
+			),
+			// Стовпчик "email".
+			'email' => array(
+				'type'				=> 'varchar',
+				'length'      => 256,
+				'description' => 'User email.',
+				'not null'    => TRUE,
+			),
+      'created' => array(
+        'description' => 'The Unix timestamp when the product was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+	        'uid' => array(
+        'description' => 'The {users}.uid that owns this product.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+					),
+		// Встановлюємо первинний ключ для "mailing_list"
+		'primary key' => array('id'),
+		'indexes' => array(
+      'uid' => array('uid'),
+      'mailing_list_created' => array('created'),
+    ),
+	);
+
+	return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function mailing_list_uninstall() {
+	// Видаляємо нашу таблицю із БД.
+	drupal_uninstall_schema('mailing_list');
+}

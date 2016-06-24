@@ -1,0 +1,71 @@
+<?php
+/**
+ * @file
+ * Module for hidden fields node and user profile.
+ */
+
+/**
+ * Implements hook_form_alter().
+ */
+function change_form_form_alter(&$form, &$form_state, $form_id) {
+	// Нам потрібно форма із id = user_profile_form.
+	if ($form_id == 'user_profile_form') {
+		global $user;
+		// Ніхто окрім адміна, не зможе редагувати націнку.
+		if ($user->uid != 1) {
+			hide($form['field_extra']);
+		}
+	}
+}
+
+/**
+ * Implements hook_cron().
+ */
+function change_form_cron() {
+	// Отримати всі ноди типу Article і Basiс page.
+	$nodes = node_load_multiple(array(), array('type' => array('article', 'page')));
+	foreach ($nodes as $node) {
+		// Змінюємо заголовок.
+		$node->title = $node->title . ' - ' . $node->nid;
+		// Зберігаємо зміни.
+		node_save($node);
+	}
+}
+
+/**
+ * Implements hook_cronapi().
+ */
+function change_form_cronapi($op, $job = NULL) {
+	switch ($op) {
+		// Повертаємо список процедур.
+		case 'list':
+			// ID операції => Опис процедури,
+			// який буде показаний в адмінці.
+			return array(
+				'change_form_process_queue' => 'Change title',
+			);
+		case 'rule':
+			// Встановлюємо інтервал запуску процедури.
+			if ($job == 'change_form_process_queue') return '* * * * *';
+		case 'execute':
+			// Виклакаємо Callback-функцію обробки даних
+			// для нашої процедури.
+			if ($job == 'change_form_process_queue') {
+				change_form_change_title();
+			}
+	}
+}
+
+/**
+ * Change title for our node.
+ */
+function change_form_change_title() {
+	// Отримати всі ноди типу Article і Basiс page.
+	$nodes = node_load_multiple(array(), array('type' => array('article', 'page')));
+	foreach ($nodes as $node) {
+		// Змінюємо заголовок.
+		$node->title = $node->title . ' - ' . date('H:i:s');
+		// Зберігаємо зміни.
+		node_save($node);
+	}
+}
